@@ -28,7 +28,7 @@ async def get_interactions(
     item_id: int | None = None,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get all interactions, optionally filtered by item."""
+    """Get all interactions, optionally filtered by item ID."""
     interactions = await read_interactions(session)
     return _filter_by_item_id(interactions, item_id)
 
@@ -45,8 +45,9 @@ async def post_interaction(
             item_id=body.item_id,
             kind=body.kind,
         )
-    except IntegrityError:
+    except IntegrityError as exc:
+        await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="learner_id or item_id does not reference an existing record",
+            detail=str(exc.orig),
         )
