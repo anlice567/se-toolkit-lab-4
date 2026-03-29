@@ -7,6 +7,7 @@ interface Item {
   id: number
   type: string
   title: string
+  description: string
   created_at: string
 }
 
@@ -38,6 +39,7 @@ function App() {
   )
   const [draft, setDraft] = useState('')
   const [fetchState, dispatch] = useReducer(fetchReducer, { status: 'idle' })
+  const [typeFilter, setTypeFilter] = useState<string>('all')
 
   useEffect(() => {
     if (!token) return
@@ -56,6 +58,16 @@ function App() {
         dispatch({ type: 'fetch_error', message: err.message }),
       )
   }, [token])
+
+  const uniqueTypes = fetchState.status === 'success'
+    ? Array.from(new Set(fetchState.items.map((item) => item.type)))
+    : []
+
+  const filteredItems = fetchState.status === 'success'
+    ? fetchState.items.filter((item) =>
+        typeFilter === 'all' ? true : item.type === typeFilter,
+      )
+    : []
 
   function handleConnect(e: FormEvent) {
     e.preventDefault()
@@ -100,21 +112,41 @@ function App() {
       {fetchState.status === 'error' && <p>Error: {fetchState.message}</p>}
 
       {fetchState.status === 'success' && (
+        <div className="filter-controls">
+          <label htmlFor="type-filter">Filter by Type:</label>
+          <select
+            id="type-filter"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            {uniqueTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {fetchState.status === 'success' && (
         <table>
           <thead>
             <tr>
               <th>ID</th>
               <th>ItemType</th>
               <th>Title</th>
+              <th>Description</th>
               <th>Created at</th>
             </tr>
           </thead>
           <tbody>
-            {fetchState.items.map((item) => (
+            {filteredItems.map((item) => (
               <tr key={item.id}>
                 <td>{item.id}</td>
                 <td>{item.type}</td>
                 <td>{item.title}</td>
+                <td>{item.description}</td>
                 <td>{item.created_at}</td>
               </tr>
             ))}
