@@ -1,7 +1,6 @@
 """AI-generated unit tests for edge cases and boundary values."""
 
-from app.models.interaction import InteractionLog, InteractionLogCreate
-from app.models.learner import LearnerCreate
+from app.models.interaction import InteractionLog
 from app.routers.interactions import _filter_by_item_id
 
 
@@ -36,8 +35,3 @@ def test_filter_with_zero_item_id_returns_empty() -> None:
     interactions = [_make_log(1, 1, 1), _make_log(2, 2, 2)]
     result = _filter_by_item_id(interactions, 0)
     assert result == []
-
-
-# DISCARDED tests (kept for reference but not included):
-# - test_interaction_log_create_with_empty_kind_string: duplicates model validation
-# - test_learner_create_with_empty_name_and_email: outside module scope
